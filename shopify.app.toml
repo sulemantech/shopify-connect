@@ -3,7 +3,7 @@
 client_id = "27fd3927f3f2c74542c87ee917654c33"
 name = "HideShipmentProvider"
 handle = "hideshipmentprovider"
-application_url = "https://military-wealth-drug-dumb.trycloudflare.com"
+application_url = "https://signs-ebook-deadly-sa.trycloudflare.com"
 embedded = true
 
 [webhooks]
@@ -19,9 +19,9 @@ api_version = "2025-04"
 
 [auth]
 redirect_urls = [
-  "https://military-wealth-drug-dumb.trycloudflare.com/auth/callback",
-  "https://military-wealth-drug-dumb.trycloudflare.com/auth/shopify/callback",
-  "https://military-wealth-drug-dumb.trycloudflare.com/api/auth/callback"
+  "https://signs-ebook-deadly-sa.trycloudflare.com/auth/callback",
+  "https://signs-ebook-deadly-sa.trycloudflare.com/auth/shopify/callback",
+  "https://signs-ebook-deadly-sa.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
