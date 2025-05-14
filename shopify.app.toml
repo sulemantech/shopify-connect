@@ -1,0 +1,31 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "27fd3927f3f2c74542c87ee917654c33"
+name = "HideShipmentProvider"
+handle = "hideshipmentprovider"
+application_url = "https://military-wealth-drug-dumb.trycloudflare.com"
+embedded = true
+
+[webhooks]
+api_version = "2025-04"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+[auth]
+redirect_urls = [
+  "https://military-wealth-drug-dumb.trycloudflare.com/auth/callback",
+  "https://military-wealth-drug-dumb.trycloudflare.com/auth/shopify/callback",
+  "https://military-wealth-drug-dumb.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
