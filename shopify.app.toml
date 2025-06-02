@@ -3,7 +3,7 @@
 client_id = "27fd3927f3f2c74542c87ee917654c33"
 name = "HideShipmentProvider"
 handle = "hideshipmentprovider"
-application_url = "https://signs-ebook-deadly-sa.trycloudflare.com"
+application_url = "https://volleyball-cast-secretariat-wearing.trycloudflare.com"
 embedded = true
 
 [webhooks]
@@ -19,9 +19,9 @@ api_version = "2025-04"
 
 [auth]
 redirect_urls = [
-  "https://signs-ebook-deadly-sa.trycloudflare.com/auth/callback",
-  "https://signs-ebook-deadly-sa.trycloudflare.com/auth/shopify/callback",
-  "https://signs-ebook-deadly-sa.trycloudflare.com/api/auth/callback"
+  "https://volleyball-cast-secretariat-wearing.trycloudflare.com/auth/callback",
+  "https://volleyball-cast-secretariat-wearing.trycloudflare.com/auth/shopify/callback",
+  "https://volleyball-cast-secretariat-wearing.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
@@ -29,3 +29,11 @@ embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,write_products,read_orders,read_customers"
+
+[development]
+use_localhost = true

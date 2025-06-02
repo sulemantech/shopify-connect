@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher,useLoaderData } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -17,10 +17,31 @@ import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  const { admin } = await authenticate.admin(request); // ✅ Fix: destructure `admin`
 
-  return null;
+  const response = await admin.graphql(`
+    query GetAllProducts {
+      products(first: 10) {
+        edges {
+          node {
+            id
+            title
+            handle
+            status
+            totalInventory
+          }
+        }
+      }
+    }
+  `);
+
+  const responseJson = await response.json();
+
+  const products = responseJson.data?.products?.edges?.map((edge: any) => edge.node) || [];
+
+  return { products };
 };
+
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
@@ -92,6 +113,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Index() {
+  const { products } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
 
   const shopify = useAppBridge();
@@ -121,6 +143,20 @@ export default function Index() {
         <Layout>
           <Layout.Section>
             <Card>
+            <Text as="h3" variant="headingMd">Product List</Text>
+            <BlockStack gap="200">
+              {products.map((product:any) => (
+                <Box key={product.id} padding="200" borderWidth="025" borderRadius="100" borderColor="border">
+                  <Text variant="bodyMd" as="p">{product.title}</Text>
+                  <Text variant="bodySm" tone="subdued" as="span">
+  Status: {product.status}
+</Text>
+<Text variant="bodySm" tone="subdued" as="span">
+  Inventory: {product.totalInventory}
+</Text>
+                </Box>
+              ))}
+            </BlockStack>
               <BlockStack gap="500">
                 <BlockStack gap="200">
                   <Text as="h2" variant="headingMd">
