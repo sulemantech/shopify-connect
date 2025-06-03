@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { useFetcher,useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -16,10 +16,36 @@ import {
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin } = await authenticate.admin(request); // ✅ Fix: destructure `admin`
+// export const loader = async ({ request }: LoaderFunctionArgs) => {
+//   const { admin } = await authenticate.admin(request); // ✅ Fix: destructure `admin`
 
-  const response = await admin.graphql(`
+//   const response = await admin.graphql(`
+//     query GetAllProducts {
+//       products(first: 10) {
+//         edges {
+//           node {
+//             id
+//             title
+//             handle
+//             status
+//             totalInventory
+//           }
+//         }
+//       }
+//     }
+//   `);
+
+//   const responseJson = await response.json();
+
+//   const products = responseJson.data?.products?.edges?.map((edge: any) => edge.node) || [];
+
+//   return { products };
+// };
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { admin } = await authenticate.admin(request);
+
+  const productResponse = await admin.graphql(`
     query GetAllProducts {
       products(first: 10) {
         edges {
@@ -35,11 +61,34 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }
   `);
 
-  const responseJson = await response.json();
+  const orderResponse = await admin.graphql(`
+    query GetOrders {
+      orders(first: 10, sortKey: CREATED_AT, reverse: true) {
+        edges {
+          node {
+            id
+            name
+            createdAt
+            totalPriceSet {
+              shopMoney {
+                amount
+                currencyCode
+              }
+            }
+            displayFinancialStatus
+          }
+        }
+      }
+    }
+  `);
 
-  const products = responseJson.data?.products?.edges?.map((edge: any) => edge.node) || [];
+  const productJson = await productResponse.json();
+  const orderJson = await orderResponse.json();
 
-  return { products };
+  const products = productJson.data?.products?.edges?.map((edge: any) => edge.node) || [];
+  const orders = orderJson.data?.orders?.edges?.map((edge: any) => edge.node) || [];
+
+  return { products, orders };
 };
 
 
@@ -113,7 +162,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Index() {
-  const { products } = useLoaderData<typeof loader>();
+  const { products, orders } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
 
   const shopify = useAppBridge();
@@ -143,20 +192,40 @@ export default function Index() {
         <Layout>
           <Layout.Section>
             <Card>
-            <Text as="h3" variant="headingMd">Product List</Text>
-            <BlockStack gap="200">
-              {products.map((product:any) => (
-                <Box key={product.id} padding="200" borderWidth="025" borderRadius="100" borderColor="border">
-                  <Text variant="bodyMd" as="p">{product.title}</Text>
-                  <Text variant="bodySm" tone="subdued" as="span">
-  Status: {product.status}
-</Text>
-<Text variant="bodySm" tone="subdued" as="span">
-  Inventory: {product.totalInventory}
-</Text>
-                </Box>
-              ))}
-            </BlockStack>
+              <Text as="h3" variant="headingMd">Product List</Text>
+              <BlockStack gap="200">
+                {products.map((product: any) => (
+                  <Box key={product.id} padding="200" borderWidth="025" borderRadius="100" borderColor="border">
+                    <Text variant="bodyMd" as="p">{product.title}</Text>
+                    <Text variant="bodySm" tone="subdued" as="span">
+                      Status: {product.status}
+                    </Text>
+                    <Text variant="bodySm" tone="subdued" as="span">
+                      Inventory: {product.totalInventory}
+                    </Text>
+                  </Box>
+                ))}
+              </BlockStack>
+              <Box paddingBlockStart="400">
+                <Text as="h3" variant="headingMd">
+                  Recent Orders
+                </Text>
+              </Box>
+              <BlockStack gap="200">
+                {orders.map((order: any) => (
+                  <Box key={order.id} padding="200" borderWidth="025" borderRadius="100" borderColor="border">
+                    <Text variant="bodyMd" as="span">{order.name}</Text>
+
+                    <Text variant="bodySm" tone="subdued" as="span">
+                      Total: {order.totalPriceSet.shopMoney.amount} {order.totalPriceSet.shopMoney.currencyCode}
+                    </Text>
+
+                    <Text variant="bodySm" tone="subdued" as="span">
+                      Created: {new Date(order.createdAt).toLocaleString()}
+                    </Text>
+                  </Box>
+                ))}
+              </BlockStack>
               <BlockStack gap="500">
                 <BlockStack gap="200">
                   <Text as="h2" variant="headingMd">
